@@ -129,13 +129,16 @@ def check(folder, plan):
     """[(stara, nowa, uwaga)]. Uwaga '' = OK, 'bez zmian' = pomijane,
     inna = blad (nic nie zostanie zmienione, dopoki bledy sa)."""
     olds = {o.lower() for o, _ in plan}
-    targets = {}
-    for _, n in plan:
+    sources, targets = {}, {}
+    for o, n in plan:
+        sources[o.lower()] = sources.get(o.lower(), 0) + 1
         targets[n.lower()] = targets.get(n.lower(), 0) + 1
     out = []
     for old, new in plan:
         if not os.path.isfile(os.path.join(folder, old)):
             note = "brak takiego pliku w folderze"
+        elif sources[old.lower()] > 1:
+            note = "plik jest na liście więcej niż raz"
         elif old == new:
             note = "bez zmian"
         else:
@@ -425,6 +428,8 @@ def selftest():
     assert notes == ["dwa pliki dostałyby tę samą nazwę", "dwa pliki dostałyby tę samą nazwę", "dwa pliki dostałyby tę samą nazwę",
                      "brak takiego pliku w folderze", "bez zmian"], notes
     assert check(d, [("skan1.pdf", "notatka.txt")])[0][2] == "plik o tej nazwie już istnieje"
+    assert [x[2] for x in check(d, [("skan1.pdf", "a.pdf"), ("SKAN1.pdf", "b.pdf")])] == \
+        ["plik jest na liście więcej niż raz"] * 2
     hist = os.path.join(tmp, "hist")
     try:
         apply(d, [("skan1.pdf", "notatka.txt")], hist)
