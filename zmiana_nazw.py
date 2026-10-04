@@ -13,7 +13,6 @@ import glob
 import os
 import re
 import sys
-import traceback
 import uuid
 
 if getattr(sys, "frozen", False):
@@ -485,6 +484,22 @@ def selftest():
     assert plan == [("notatka.txt", "Notatka sluzbowa.txt"), ("skan2.pdf", "Strona 1.pdf")], plan
     assert apply(d, plan, hist) == 2
     assert "Notatka sluzbowa.txt" in os.listdir(d)
+
+    # cofniecie odmawia, gdy pliki zmienily sie od tamtej pory
+    open(os.path.join(d, "notatka.txt"), "w").close()
+    try:
+        undo_last(hist)
+        raise AssertionError("cofniecie nadpisaloby plik")
+    except ValueError:
+        pass
+    assert "Notatka sluzbowa.txt" in os.listdir(d)
+
+    # kolejnosc wedlug daty modyfikacji
+    for i, n in enumerate(("c.pdf", "a.pdf", "b.pdf")):
+        p = os.path.join(tmp, n)
+        open(p, "w").close()
+        os.utime(p, (1_700_000_000 + i, 1_700_000_000 + i))
+    assert list_files(tmp, "*.pdf", "data modyfikacji") == ["c.pdf", "a.pdf", "b.pdf"]
     shutil.rmtree(tmp, ignore_errors=True)
 
     import aktualizacja

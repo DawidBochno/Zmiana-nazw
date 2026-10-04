@@ -112,4 +112,6 @@ python zmiana_nazw.py --selftest
 
 Test sprawdza sortowanie naturalne, wszystkie pola wzoru, wykrywanie
 konfliktów i niedozwolonych nazw, zamianę nazw miejscami, zmianę wielkości
-liter, cofanie, wycofanie zmian po błędzie w połowie oraz listę w Excelu.
+liter, kolejność według daty, cofanie (także odmowę cofnięcia, gdy pliki
+zmieniły się w międzyczasie), wycofanie zmian po błędzie w połowie, plik
+powtórzony na liście oraz listę w Excelu.
